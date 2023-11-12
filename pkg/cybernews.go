@@ -8,7 +8,9 @@ import (
 	"github.com/google/uuid"
 )
 
-var wg sync.WaitGroup
+var (
+	wg sync.WaitGroup
+)
 
 type News struct {
 	Id       string `json:"id"`
@@ -135,7 +137,7 @@ func GetNews(newsType string) ([]News, error) {
 
 	for _, newsSelector := range NewsSelectors {
 		wg.Add(1)
-		go func(newsData *NewsFieldSelectors) {
+		go func(newsData NewsFieldSelectors) {
 			defer wg.Done()
 
 			data := make([][]string, 6)
@@ -154,10 +156,10 @@ func GetNews(newsType string) ([]News, error) {
 			scrapeNews(collyClone, newsData.image, 3, "image", &data)
 
 			// Get Urls
-			scrapeNews(collyClone, ".desc figure a", 4, "url", &data)
+			scrapeNews(collyClone, newsData.url, 4, "url", &data)
 
 			// Get Date
-			scrapeNews(collyClone, "", 5, "date", &data)
+			scrapeNews(collyClone, newsData.date, 5, "date", &data)
 
 			collyClone.OnRequest(func(r *colly.Request) {
 				fmt.Println("Visiting", r.URL)
@@ -175,8 +177,9 @@ func GetNews(newsType string) ([]News, error) {
 			for i := 0; i < size; i++ {
 				results = append(results, formatNews(data, i))
 			}
-		}(&newsSelector)
+		}(newsSelector)
 	}
+	c.Wait()
 	wg.Wait()
 
 	return results, nil

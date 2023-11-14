@@ -15,21 +15,17 @@ var (
 type News struct {
 	Id       string `json:"id"`
 	Headline string `json:"headlines"`
-	Author   string `json:"articles"`
 	FullNews string `json:"status"`
 	Url      string `json:"url"`
 	Image    string `json:"image"`
-	Date     string `json:"date"`
 }
 
 type NewsFieldSelectors struct {
 	payloadUrl string
 	headlines  string
-	author     string
 	fullNews   string
 	url        string
 	image      string
-	date       string
 }
 
 var NewsType = map[string][]NewsFieldSelectors{
@@ -37,20 +33,155 @@ var NewsType = map[string][]NewsFieldSelectors{
 		{
 			payloadUrl: "https://ciosea.economictimes.indiatimes.com/news/next-gen-technologies",
 			headlines:  "article.desc div h3.heading",
-			author:     "",
 			fullNews:   "article.desc div p.desktop-view",
 			url:        "article.desc figure a",
 			image:      "article.desc figure a img",
-			date:       "",
 		},
 		{
 			payloadUrl: "https://telecom.economictimes.indiatimes.com/news/internet",
 			headlines:  "article.desc div h3.heading",
-			author:     "",
 			fullNews:   "article.desc div p.desktop-view",
 			url:        "article.desc figure a",
 			image:      "article.desc figure a img",
-			date:       "",
+		},
+		{
+			payloadUrl: "https://ciosea.economictimes.indiatimes.com/news/consumer-tech",
+			headlines:  "article.desc div h3.heading",
+			fullNews:   "article.desc div p.desktop-view",
+			image:      ".desc figure a img",
+			url:        ".desc figure a",
+		},
+	},
+	"dataBreach": {
+		{
+			payloadUrl: "https://thehackernews.com/search/label/data%20breach",
+			headlines:  "h2.home-title",
+			fullNews:   ".home-desc",
+			url:        "a.story-link",
+			image:      ".img-ratio img",
+		},
+		{
+			payloadUrl: "https://ciso.economictimes.indiatimes.com/news/data-breaches",
+			headlines:  "article.desc div h3.heading",
+			fullNews:   "article.desc div p.desktop-view",
+			url:        ".desc figure a img",
+			image:      ".desc figure a",
+		},
+	},
+	"cyberAttack": {
+		{
+			payloadUrl: "https://thehackernews.com/search/label/Cyber%20Attack",
+			headlines:  "h2.home-title",
+			fullNews:   ".home-desc",
+			image:      ".img-ratio img",
+			url:        "a.story-link",
+		},
+		{
+			payloadUrl: "https://ciso.economictimes.indiatimes.com/news/cybercrime-fraud",
+			headlines:  "article.desc div h3.heading",
+			fullNews:   "article.desc div p.desktop-view",
+			image:      ".desc figure a img",
+			url:        ".desc figure a",
+		},
+	},
+	"vulnerability": {
+		{
+			payloadUrl: "https://thehackernews.com/search/label/Vulnerability",
+			headlines:  "h2.home-title",
+			fullNews:   ".home-desc",
+			image:      ".img-ratio img",
+			url:        "a.story-link",
+		},
+		{
+			payloadUrl: "https://ciso.economictimes.indiatimes.com/news/vulnerabilities-exploits",
+			headlines:  "article.desc div h3.heading",
+			fullNews:   "article.desc div p.desktop-view",
+			image:      ".desc figure a img",
+			url:        ".desc figure a",
+		},
+	},
+	"malware": {
+		{
+			payloadUrl: "https://thehackernews.com/search/label/Malware",
+			headlines:  "h2.home-title",
+			fullNews:   ".home-desc",
+			image:      ".img-ratio img",
+			url:        "a.story-link",
+		},
+	},
+	"security": {
+		{
+			payloadUrl: "https://ciosea.economictimes.indiatimes.com/news/security",
+			headlines:  "article.desc div h3.heading",
+			fullNews:   "article.desc div p.desktop-view",
+			image:      ".desc figure a img",
+			url:        ".desc figure a",
+		},
+		{
+			payloadUrl: "https://telecom.economictimes.indiatimes.com/tag/hacking",
+			headlines:  "article.desc div h3.heading",
+			fullNews:   "article.desc div p.desktop-view",
+			image:      ".desc figure a img",
+			url:        ".desc figure a",
+		},
+	},
+	"cloud": {
+		{
+			payloadUrl: "https://ciosea.economictimes.indiatimes.com/news/cloud-computing",
+			headlines:  "article.desc div h3.heading",
+			fullNews:   "article.desc div p.desktop-view",
+			image:      ".desc figure a img",
+			url:        ".desc figure a",
+		},
+	},
+	"bigData": {
+		{
+			payloadUrl: "https://ciosea.economictimes.indiatimes.com/news/big-data",
+			headlines:  "article.desc div h3.heading",
+			fullNews:   "article.desc div p.desktop-view",
+			image:      ".desc figure a img",
+			url:        ".desc figure a",
+		},
+		{
+			payloadUrl: "https://ciosea.economictimes.indiatimes.com/news/data-center",
+			headlines:  "article.desc div h3.heading",
+			fullNews:   "article.desc div p.desktop-view",
+			image:      ".desc figure a img",
+			url:        ".desc figure a",
+		},
+	},
+	"research": {
+		{
+			payloadUrl: "https://ciosea.economictimes.indiatimes.com/tag/research",
+			headlines:  "article.desc div h3.heading",
+			fullNews:   "article.desc div p.desktop-view",
+			image:      ".desc figure a img",
+			url:        ".desc figure a",
+		},
+	},
+	"socialMedia": {
+		{
+			payloadUrl: "https://telecom.economictimes.indiatimes.com/search/social",
+			headlines:  "article.desc div h3.heading",
+			fullNews:   "article.desc div p.desktop-view",
+			image:      ".desc figure a img",
+			url:        ".desc figure a",
+		},
+	},
+	"corporate": {
+		{
+			payloadUrl: "https://ciosea.economictimes.indiatimes.com/news/corporate",
+			headlines:  "article.desc div h3.heading",
+			fullNews:   "article.desc div p.desktop-view",
+			image:      ".desc figure a img",
+			url:        ".desc figure a",
+		},
+		{
+			payloadUrl: "https://telecom.economictimes.indiatimes.com/news/industry",
+			headlines:  "article.desc div h3.heading",
+			fullNews:   "article.desc div p.desktop-view",
+			image:      ".desc figure a img",
+			url:        ".desc figure a",
 		},
 	},
 }
@@ -92,45 +223,41 @@ func formatNews(data [][]string, index int) News {
 	}
 
 	if index < len(data[1]) {
-		news.Author = data[1][index]
-	} else {
-		news.Author = ""
-	}
-
-	if index < len(data[2]) {
-		news.FullNews = data[2][index]
+		news.FullNews = data[1][index]
 	} else {
 		news.FullNews = ""
 	}
 
-	if index < len(data[3]) {
-		news.Url = data[3][index]
+	if index < len(data[2]) {
+		news.Url = data[2][index]
 	} else {
 		news.Url = ""
 	}
 
-	if index < len(data[4]) {
-		news.Image = data[4][index]
+	if index < len(data[3]) {
+		news.Image = data[3][index]
 	} else {
 		news.Image = ""
-	}
-
-	if index < len(data[5]) {
-		news.Date = data[5][index]
-	} else {
-		news.Date = ""
 	}
 
 	return news
 }
 
+func NewsTypeValidator(newsType string) ([]NewsFieldSelectors, error) {
+	NewsSelectors, exists := NewsType[newsType]
+	if !exists {
+		return nil, fmt.Errorf("News Type %s does not exist", newsType)
+	}
+
+	return NewsSelectors, nil
+}
+
 func GetNews(newsType string) ([]News, error) {
 	results := make([]News, 0)
 
-	NewsSelectors, exists := NewsType[newsType]
-
-	if !exists {
-		return results, fmt.Errorf("News Type %s does not exist", newsType)
+	NewsSelectors, err := NewsTypeValidator(newsType)
+	if err != nil {
+		return results, err
 	}
 
 	c := colly.NewCollector(colly.Async(true))
@@ -140,26 +267,20 @@ func GetNews(newsType string) ([]News, error) {
 		go func(newsData NewsFieldSelectors) {
 			defer wg.Done()
 
-			data := make([][]string, 6)
+			data := make([][]string, 4)
 			collyClone := c.Clone()
 
 			// Get Headlines
 			scrapeNews(collyClone, newsData.headlines, 0, "headline", &data)
 
-			// Get Authors
-			scrapeNews(collyClone, newsData.author, 1, "author", &data)
-
 			// Get FullNews
-			scrapeNews(collyClone, newsData.fullNews, 2, "fullNews", &data)
+			scrapeNews(collyClone, newsData.fullNews, 1, "fullNews", &data)
 
 			// Get Images
-			scrapeNews(collyClone, newsData.image, 3, "image", &data)
+			scrapeNews(collyClone, newsData.image, 2, "image", &data)
 
 			// Get Urls
-			scrapeNews(collyClone, newsData.url, 4, "url", &data)
-
-			// Get Date
-			scrapeNews(collyClone, newsData.date, 5, "date", &data)
+			scrapeNews(collyClone, newsData.url, 3, "url", &data)
 
 			collyClone.OnRequest(func(r *colly.Request) {
 				fmt.Println("Visiting", r.URL)
@@ -172,7 +293,7 @@ func GetNews(newsType string) ([]News, error) {
 			collyClone.Visit(newsData.payloadUrl)
 			collyClone.Wait()
 
-			size := max(len(data[0]), len(data[1]), len(data[2]), len(data[3]), len(data[4]), len(data[5]))
+			size := max(len(data[0]), len(data[1]), len(data[2]), len(data[3]))
 
 			for i := 0; i < size; i++ {
 				results = append(results, formatNews(data, i))

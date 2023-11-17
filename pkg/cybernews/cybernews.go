@@ -1,7 +1,10 @@
-package pkg
+package cybernews
 
 import (
+	"crypto/tls"
 	"fmt"
+	"log"
+	"net/http"
 	"sync"
 
 	colly "github.com/gocolly/colly/v2"
@@ -243,10 +246,10 @@ func formatNews(data [][]string, index int) News {
 	return news
 }
 
-func NewsTypeValidator(newsType string) ([]NewsFieldSelectors, error) {
+func ValidateNewsType(newsType string) ([]NewsFieldSelectors, error) {
 	NewsSelectors, exists := NewsType[newsType]
 	if !exists {
-		return nil, fmt.Errorf("News Type %s does not exist", newsType)
+		return nil, fmt.Errorf("news type (%s) does not exist", newsType)
 	}
 
 	return NewsSelectors, nil
@@ -255,12 +258,15 @@ func NewsTypeValidator(newsType string) ([]NewsFieldSelectors, error) {
 func GetNews(newsType string) ([]News, error) {
 	results := make([]News, 0)
 
-	NewsSelectors, err := NewsTypeValidator(newsType)
+	NewsSelectors, err := ValidateNewsType(newsType)
 	if err != nil {
-		return results, err
+		return nil, err
 	}
 
 	c := colly.NewCollector(colly.Async(true))
+	c.WithTransport(&http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	})
 
 	for _, newsSelector := range NewsSelectors {
 		wg.Add(1)
@@ -283,11 +289,11 @@ func GetNews(newsType string) ([]News, error) {
 			scrapeNews(collyClone, newsData.url, 3, "url", &data)
 
 			collyClone.OnRequest(func(r *colly.Request) {
-				fmt.Println("Visiting", r.URL)
+				log.Println("Visiting", r.URL)
 			})
 
 			collyClone.OnError(func(r *colly.Response, err error) {
-				fmt.Println("Request URL:", r.Request.URL, "failed with response:", r, "\nand error:", err.Error())
+				log.Println("Request URL:", r.Request.URL, "failed with response:", r, "\nand error:", err.Error())
 			})
 
 			collyClone.Visit(newsData.payloadUrl)

@@ -17,4 +17,6 @@ FROM scratch
 
 COPY --from=builder /app/cyberpecker-api /
 
-CMD [ "./cyberpecker-api" ]
+EXPOSE 8000
+
+CMD [ "/cyberpecker-api" ]

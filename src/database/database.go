@@ -4,9 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
-	cybernews "github.com/hitesh22rana/cyberpecker-api/pkg/cybernews"
+	cybernews "github.com/hitesh22rana/cyberpecker-api/src/cybernews"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -24,6 +25,14 @@ func NewRedisClient(config *redis.Options) *redis.Client {
 	return redis.NewClient(config)
 }
 
+func Health(client *redis.Client) error {
+	if err := client.Ping(context.Background()).Err(); err != nil {
+		return ErrorConnecting
+	}
+
+	return nil
+}
+
 func SaveNews(client *redis.Client, ctx context.Context, key string, value []cybernews.News) error {
 	data, err := json.Marshal(value)
 	if err != nil {
@@ -39,8 +48,14 @@ func SaveNews(client *redis.Client, ctx context.Context, key string, value []cyb
 
 func RetrieveNews(client *redis.Client, ctx context.Context, key string) ([]cybernews.News, error) {
 	data, err := client.Get(ctx, key).Result()
+	fmt.Println()
+
 	if err != nil {
-		return nil, ErrorNewsNotFound
+		if errors.Is(err, redis.Nil) {
+			return nil, ErrorNewsNotFound
+		}
+
+		return nil, ErrorConnecting
 	}
 
 	var news []cybernews.News
@@ -51,3 +66,6 @@ func RetrieveNews(client *redis.Client, ctx context.Context, key string) ([]cybe
 
 	return news, nil
 }
+
+// dial tcp [::1]:6379: connectex: No connection could be made because the target machine actively refused it.
+// redis: nil

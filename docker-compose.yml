@@ -1,0 +1,25 @@
+version: "3"
+name: "cyberpecker-api"
+
+services:
+    database:
+        image: redis
+        container_name: redis
+        restart: always
+        networks:
+            - cyberpecker-api
+        ports:
+            - "6379:6379"
+
+    api:
+        build:
+            context: ./
+            dockerfile: Dockerfile
+        container_name: api
+        restart: always
+        ports:
+            - "8000:8000"
+
+networks:
+    cyberpecker-api:
+        name: cyberpecker-api

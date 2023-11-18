@@ -2,14 +2,17 @@ package main
 
 import (
 	"errors"
+	"log"
 	"net/http"
+	"os"
 
-	cybernews "github.com/hitesh22rana/cyberpecker-api/pkg/cybernews"
-	database "github.com/hitesh22rana/cyberpecker-api/pkg/database"
-	"github.com/redis/go-redis/v9"
+	cybernews "github.com/hitesh22rana/cyberpecker-api/src/cybernews"
+	database "github.com/hitesh22rana/cyberpecker-api/src/database"
 
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/redis/go-redis/v9"
 )
 
 var (
@@ -27,8 +30,8 @@ func dbMiddleware(databaseClient *redis.Client) echo.MiddlewareFunc {
 }
 
 func getNews(c echo.Context) error {
-	newsType := c.QueryParam("type")
-	if _, err := cybernews.ValidateNewsType(newsType); err != nil {
+	newsCategory := c.QueryParam("category")
+	if _, err := cybernews.ValidateNewsCategory(newsCategory); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
@@ -37,34 +40,45 @@ func getNews(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, database.ErrorConnecting.Error())
 	}
 
-	data, err := database.RetrieveNews(dbClient, c.Request().Context(), newsType)
-	if err == nil {
+	data, err := database.RetrieveNews(dbClient, c.Request().Context(), newsCategory)
+	if data != nil {
 		return c.JSON(http.StatusOK, data)
 	}
 
-	if err != nil && errors.Is(err, database.ErrorJsonParsing) {
+	if err != nil && (errors.Is(err, database.ErrorConnecting) || errors.Is(err, database.ErrorJsonParsing)) {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	news, err := cybernews.GetNews(newsType)
+	news, err := cybernews.GetNews(newsCategory)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	database.SaveNews(dbClient, c.Request().Context(), newsType, news)
+	database.SaveNews(dbClient, c.Request().Context(), newsCategory, news)
 	return c.JSON(http.StatusOK, news)
 }
 
 func main() {
-	databaseClient := database.NewRedisClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatalln("error loading .env file")
+	}
+
+	dbAddr := os.Getenv("DATABASE_ADDRESS")
+	dbPassword := os.Getenv("DATABASE_PASSWORD")
+	dbClient := database.NewRedisClient(&redis.Options{
+		Addr:     dbAddr,
+		Password: dbPassword,
 		DB:       0,
 	})
-	defer databaseClient.Close()
+	defer dbClient.Close()
+
+	if err := database.Health(dbClient); err != nil {
+		log.Fatalln(err)
+	}
 
 	e := echo.New()
-	e.Use(dbMiddleware(databaseClient))
+	e.Use(dbMiddleware(dbClient))
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())

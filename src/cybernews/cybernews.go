@@ -18,12 +18,12 @@ var (
 type News struct {
 	Id       string `json:"id"`
 	Headline string `json:"headlines"`
-	FullNews string `json:"status"`
+	FullNews string `json:"news"`
 	Url      string `json:"url"`
 	Image    string `json:"image"`
 }
 
-type NewsFieldSelectors struct {
+type NewsFields struct {
 	payloadUrl string
 	headlines  string
 	fullNews   string
@@ -31,7 +31,7 @@ type NewsFieldSelectors struct {
 	image      string
 }
 
-var NewsType = map[string][]NewsFieldSelectors{
+var NewsCategory = map[string][]NewsFields{
 	"general": {
 		{
 			payloadUrl: "https://ciosea.economictimes.indiatimes.com/news/next-gen-technologies",
@@ -207,7 +207,7 @@ func scrapeNews(c *colly.Collector, goQuerySelector string, index int8, name str
 		}
 	})
 
-	c.OnScraped(func(r *colly.Response) {
+	c.OnScraped(func(_ *colly.Response) {
 		(*data)[index] = results
 	})
 
@@ -246,19 +246,19 @@ func formatNews(data [][]string, index int) News {
 	return news
 }
 
-func ValidateNewsType(newsType string) ([]NewsFieldSelectors, error) {
-	NewsSelectors, exists := NewsType[newsType]
+func ValidateNewsCategory(newsCategory string) ([]NewsFields, error) {
+	NewsSelectors, exists := NewsCategory[newsCategory]
 	if !exists {
-		return nil, fmt.Errorf("news type (%s) does not exist", newsType)
+		return nil, fmt.Errorf("news category: (%s) does not exist", newsCategory)
 	}
 
 	return NewsSelectors, nil
 }
 
-func GetNews(newsType string) ([]News, error) {
+func GetNews(newsCategory string) ([]News, error) {
 	results := make([]News, 0)
 
-	NewsSelectors, err := ValidateNewsType(newsType)
+	NewsSelectors, err := ValidateNewsCategory(newsCategory)
 	if err != nil {
 		return nil, err
 	}
@@ -270,7 +270,7 @@ func GetNews(newsType string) ([]News, error) {
 
 	for _, newsSelector := range NewsSelectors {
 		wg.Add(1)
-		go func(newsData NewsFieldSelectors) {
+		go func(newsData NewsFields) {
 			defer wg.Done()
 
 			data := make([][]string, 4)
@@ -287,10 +287,6 @@ func GetNews(newsType string) ([]News, error) {
 
 			// Get Urls
 			scrapeNews(collyClone, newsData.url, 3, "url", &data)
-
-			collyClone.OnRequest(func(r *colly.Request) {
-				log.Println("Visiting", r.URL)
-			})
 
 			collyClone.OnError(func(r *colly.Response, err error) {
 				log.Println("Request URL:", r.Request.URL, "failed with response:", r, "\nand error:", err.Error())

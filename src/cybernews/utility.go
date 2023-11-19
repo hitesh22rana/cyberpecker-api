@@ -32,6 +32,10 @@ func scrapeNews(c *colly.Collector, querySelector string, index int8, field stri
 	c.Wait()
 }
 
+func (news *News) checkAdvertisement(domain string) bool {
+	return !strings.Contains(news.Link, domain)
+}
+
 func fixNewsUrl(link string, url string) string {
 	if strings.Contains(link, "https://") {
 		return link

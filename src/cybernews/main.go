@@ -59,7 +59,11 @@ func GetNews(newsCategory string) ([]News, error) {
 			size := max(len(data[0]), len(data[1]), len(data[2]), len(data[3]))
 
 			for i := 0; i < size; i++ {
-				results = append(results, formatNews(data, i, newsData.source, newsData.url))
+				news := formatNews(data, i, newsData.source, newsData.url)
+				if advertisement := news.checkAdvertisement(newsData.domain); advertisement {
+					continue
+				}
+				results = append(results, news)
 			}
 		}(newsSelector)
 	}

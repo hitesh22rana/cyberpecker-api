@@ -10,6 +10,7 @@ type News struct {
 }
 
 type NewsFields struct {
+	domain   string
 	source   string
 	url      string
 	headline string
@@ -21,6 +22,7 @@ type NewsFields struct {
 var newsCategory = map[string][]NewsFields{
 	"general": {
 		{
+			domain:   "https://ciosea.economictimes.indiatimes.com",
 			source:   "The Economic Times",
 			url:      "https://ciosea.economictimes.indiatimes.com/news/next-gen-technologies",
 			headline: "article.desc div h3.heading",
@@ -29,6 +31,7 @@ var newsCategory = map[string][]NewsFields{
 			image:    "article.desc figure a img",
 		},
 		{
+			domain:   "https://telecom.economictimes.indiatimes.com",
 			source:   "The Economic Times",
 			url:      "https://telecom.economictimes.indiatimes.com/news/internet",
 			headline: "article.desc div h3.heading",
@@ -37,6 +40,7 @@ var newsCategory = map[string][]NewsFields{
 			image:    "article.desc figure a img",
 		},
 		{
+			domain:   "https://ciosea.economictimes.indiatimes.com",
 			source:   "The Economic Times",
 			url:      "https://ciosea.economictimes.indiatimes.com/news/consumer-tech",
 			headline: "article.desc div h3.heading",
@@ -47,6 +51,7 @@ var newsCategory = map[string][]NewsFields{
 	},
 	"dataBreach": {
 		{
+			domain:   "https://thehackernews.com",
 			source:   "The Hacker News",
 			url:      "https://thehackernews.com/search/label/data%20breach",
 			headline: "h2.home-title",
@@ -55,6 +60,7 @@ var newsCategory = map[string][]NewsFields{
 			image:    ".img-ratio img",
 		},
 		{
+			domain:   "https://ciso.economictimes.indiatimes.com",
 			source:   "The Economic Times",
 			url:      "https://ciso.economictimes.indiatimes.com/news/data-breaches",
 			headline: "article.desc div h3.heading",
@@ -65,6 +71,7 @@ var newsCategory = map[string][]NewsFields{
 	},
 	"cyberAttack": {
 		{
+			domain:   "https://thehackernews.com",
 			source:   "The Hacker News",
 			url:      "https://thehackernews.com/search/label/Cyber%20Attack",
 			headline: "h2.home-title",
@@ -73,6 +80,7 @@ var newsCategory = map[string][]NewsFields{
 			image:    ".img-ratio img",
 		},
 		{
+			domain:   "https://ciso.economictimes.indiatimes.com",
 			source:   "The Economic Times",
 			url:      "https://ciso.economictimes.indiatimes.com/news/cybercrime-fraud",
 			headline: "article.desc div h3.heading",
@@ -83,6 +91,7 @@ var newsCategory = map[string][]NewsFields{
 	},
 	"vulnerability": {
 		{
+			domain:   "https://thehackernews.com",
 			source:   "The Hacker News",
 			url:      "https://thehackernews.com/search/label/Vulnerability",
 			headline: "h2.home-title",
@@ -91,6 +100,7 @@ var newsCategory = map[string][]NewsFields{
 			image:    ".img-ratio img",
 		},
 		{
+			domain:   "https://ciso.economictimes.indiatimes.com",
 			source:   "The Economic Times",
 			url:      "https://ciso.economictimes.indiatimes.com/news/vulnerabilities-exploits",
 			headline: "article.desc div h3.heading",
@@ -101,6 +111,7 @@ var newsCategory = map[string][]NewsFields{
 	},
 	"malware": {
 		{
+			domain:   "https://thehackernews.com",
 			source:   "The Hacker News",
 			url:      "https://thehackernews.com/search/label/Malware",
 			headline: "h2.home-title",
@@ -111,6 +122,7 @@ var newsCategory = map[string][]NewsFields{
 	},
 	"security": {
 		{
+			domain:   "https://ciso.economictimes.indiatimes.com",
 			source:   "The Economic Times",
 			url:      "https://ciosea.economictimes.indiatimes.com/news/security",
 			headline: "article.desc div h3.heading",
@@ -119,6 +131,7 @@ var newsCategory = map[string][]NewsFields{
 			image:    ".desc figure a img",
 		},
 		{
+			domain:   "https://telecom.economictimes.indiatimes.com",
 			source:   "The Economic Times",
 			url:      "https://telecom.economictimes.indiatimes.com/tag/hacking",
 			headline: "article.desc div h3.heading",
@@ -129,6 +142,7 @@ var newsCategory = map[string][]NewsFields{
 	},
 	"cloud": {
 		{
+			domain:   "https://ciso.economictimes.indiatimes.com",
 			source:   "The Economic Times",
 			url:      "https://ciosea.economictimes.indiatimes.com/news/cloud-computing",
 			headline: "article.desc div h3.heading",
@@ -139,6 +153,7 @@ var newsCategory = map[string][]NewsFields{
 	},
 	"bigData": {
 		{
+			domain:   "https://ciso.economictimes.indiatimes.com",
 			source:   "The Economic Times",
 			url:      "https://ciosea.economictimes.indiatimes.com/news/big-data",
 			headline: "article.desc div h3.heading",
@@ -147,6 +162,7 @@ var newsCategory = map[string][]NewsFields{
 			image:    ".desc figure a img",
 		},
 		{
+			domain:   "https://ciso.economictimes.indiatimes.com",
 			source:   "The Economic Times",
 			url:      "https://ciosea.economictimes.indiatimes.com/news/data-center",
 			headline: "article.desc div h3.heading",
@@ -157,6 +173,7 @@ var newsCategory = map[string][]NewsFields{
 	},
 	"research": {
 		{
+			domain:   "https://ciso.economictimes.indiatimes.com",
 			source:   "The Economic Times",
 			url:      "https://ciosea.economictimes.indiatimes.com/tag/research",
 			headline: "article.desc div h3.heading",
@@ -167,6 +184,7 @@ var newsCategory = map[string][]NewsFields{
 	},
 	"socialMedia": {
 		{
+			domain:   "https://telecom.economictimes.indiatimes.com",
 			source:   "The Economic Times",
 			url:      "https://telecom.economictimes.indiatimes.com/search/social",
 			headline: "article.desc div h3.heading",
@@ -177,6 +195,7 @@ var newsCategory = map[string][]NewsFields{
 	},
 	"corporate": {
 		{
+			domain:   "https://ciso.economictimes.indiatimes.com",
 			source:   "The Economic Times",
 			url:      "https://ciosea.economictimes.indiatimes.com/news/corporate",
 			headline: "article.desc div h3.heading",
@@ -185,6 +204,7 @@ var newsCategory = map[string][]NewsFields{
 			image:    ".desc figure a img",
 		},
 		{
+			domain:   "https://telecom.economictimes.indiatimes.com",
 			source:   "The Economic Times",
 			url:      "https://telecom.economictimes.indiatimes.com/news/industry",
 			headline: "article.desc div h3.heading",

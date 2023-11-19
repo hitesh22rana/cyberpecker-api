@@ -2,7 +2,7 @@ version: "3"
 name: "cyberpecker-api"
 
 services:
-    database:
+    redis:
         image: redis
         container_name: redis
         restart: always
@@ -17,8 +17,17 @@ services:
             dockerfile: Dockerfile
         container_name: api
         restart: always
+        networks:
+            - cyberpecker-api
+        env_file:
+            - ./.env
+        environment:
+            - DATABASE_ADDRESS=redis:6379
+            - DATABASE_PASSWORD=
         ports:
             - "8000:8000"
+        depends_on:
+            - redis
 
 networks:
     cyberpecker-api:

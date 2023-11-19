@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"os"
 
+	cache "github.com/hitesh22rana/cyberpecker-api/src/cache"
 	cybernews "github.com/hitesh22rana/cyberpecker-api/src/cybernews"
-	database "github.com/hitesh22rana/cyberpecker-api/src/database"
-
 	"github.com/joho/godotenv"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/redis/go-redis/v9"
@@ -17,13 +17,14 @@ import (
 
 var (
 	port               = ":8000"
+	lruCacheContextKey = "lruCache"
 	databaseContextkey = "database"
 )
 
-func dbMiddleware(databaseClient *redis.Client) echo.MiddlewareFunc {
+func addMiddleware[T any](client *T, contextKey string) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			c.Set(databaseContextkey, databaseClient)
+			c.Set(contextKey, client)
 			return next(c)
 		}
 	}
@@ -35,17 +36,28 @@ func getNews(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	dbClient, ok := c.Get("database").(*redis.Client)
+	lruCache, ok := c.Get("lruCache").(*cache.LRUCache)
 	if !ok {
-		return echo.NewHTTPError(http.StatusInternalServerError, database.ErrorConnecting.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, cache.ErrorConnecting.Error())
 	}
 
-	data, err := database.RetrieveNews(dbClient, c.Request().Context(), newsCategory)
+	cachedData := lruCache.GetNews(newsCategory)
+	if cachedData != nil {
+		return c.JSON(http.StatusOK, cachedData)
+	}
+
+	dbClient, ok := c.Get("database").(*cache.RedisClient)
+	if !ok {
+		return echo.NewHTTPError(http.StatusInternalServerError, cache.ErrorConnecting.Error())
+	}
+
+	data, err := dbClient.GetNews(c.Request().Context(), newsCategory)
 	if data != nil {
+		lruCache.SetNews(newsCategory, data)
 		return c.JSON(http.StatusOK, data)
 	}
 
-	if err != nil && (errors.Is(err, database.ErrorConnecting) || errors.Is(err, database.ErrorJsonParsing)) {
+	if err != nil && (errors.Is(err, cache.ErrorConnecting) || errors.Is(err, cache.ErrorJsonParsing)) {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
@@ -54,7 +66,7 @@ func getNews(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	database.SaveNews(dbClient, c.Request().Context(), newsCategory, news)
+	dbClient.SetNews(c.Request().Context(), newsCategory, news)
 	return c.JSON(http.StatusOK, news)
 }
 
@@ -66,19 +78,22 @@ func main() {
 
 	dbAddr := os.Getenv("DATABASE_ADDRESS")
 	dbPassword := os.Getenv("DATABASE_PASSWORD")
-	dbClient := database.NewRedisClient(&redis.Options{
+	dbClient := cache.NewRedisClient(&redis.Options{
 		Addr:     dbAddr,
 		Password: dbPassword,
 		DB:       0,
 	})
 	defer dbClient.Close()
 
-	if err := database.Health(dbClient); err != nil {
+	if err := dbClient.Health(); err != nil {
 		log.Fatalln(err)
 	}
 
+	lruCache := cache.NewLRUCache(10, 120)
+
 	e := echo.New()
-	e.Use(dbMiddleware(dbClient))
+	e.Use(addMiddleware(dbClient, databaseContextkey))
+	e.Use(addMiddleware(lruCache, lruCacheContextKey))
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())

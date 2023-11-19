@@ -1,10 +1,9 @@
-package database
+package cache
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"time"
 
 	cybernews "github.com/hitesh22rana/cyberpecker-api/src/cybernews"
@@ -21,11 +20,17 @@ var (
 	ErrorNewsNotFound = errors.New("news not found")
 )
 
-func NewRedisClient(config *redis.Options) *redis.Client {
-	return redis.NewClient(config)
+type RedisClient struct {
+	*redis.Client
 }
 
-func Health(client *redis.Client) error {
+func NewRedisClient(config *redis.Options) *RedisClient {
+	return &RedisClient{
+		redis.NewClient(config),
+	}
+}
+
+func (client *RedisClient) Health() error {
 	if err := client.Ping(context.Background()).Err(); err != nil {
 		return ErrorConnecting
 	}
@@ -33,22 +38,21 @@ func Health(client *redis.Client) error {
 	return nil
 }
 
-func SaveNews(client *redis.Client, ctx context.Context, key string, value []cybernews.News) error {
+func (c *RedisClient) SetNews(ctx context.Context, key string, value []cybernews.News) error {
 	data, err := json.Marshal(value)
 	if err != nil {
 		return ErrorJsonEncoding
 	}
 
-	err = client.Set(ctx, key, data, dataExpirationTime).Err()
+	err = c.Set(ctx, key, data, dataExpirationTime).Err()
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func RetrieveNews(client *redis.Client, ctx context.Context, key string) ([]cybernews.News, error) {
-	data, err := client.Get(ctx, key).Result()
-	fmt.Println()
+func (c *RedisClient) GetNews(ctx context.Context, key string) ([]cybernews.News, error) {
+	data, err := c.Get(ctx, key).Result()
 
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
@@ -66,6 +70,3 @@ func RetrieveNews(client *redis.Client, ctx context.Context, key string) ([]cybe
 
 	return news, nil
 }
-
-// dial tcp [::1]:6379: connectex: No connection could be made because the target machine actively refused it.
-// redis: nil

@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 
 	cache "github.com/hitesh22rana/cyberpecker-api/src/cache"
 	cybernews "github.com/hitesh22rana/cyberpecker-api/src/cybernews"
@@ -36,7 +39,7 @@ func getNews(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	lruCache, ok := c.Get("lruCache").(*cache.LRUCache)
+	lruCache, ok := c.Get(lruCacheContextKey).(*cache.LRUCache)
 	if !ok {
 		return echo.NewHTTPError(http.StatusInternalServerError, cache.ErrorConnecting.Error())
 	}
@@ -46,7 +49,7 @@ func getNews(c echo.Context) error {
 		return c.JSON(http.StatusOK, cachedData)
 	}
 
-	dbClient, ok := c.Get("database").(*cache.RedisClient)
+	dbClient, ok := c.Get(databaseContextkey).(*cache.RedisClient)
 	if !ok {
 		return echo.NewHTTPError(http.StatusInternalServerError, cache.ErrorConnecting.Error())
 	}
@@ -71,9 +74,10 @@ func getNews(c echo.Context) error {
 }
 
 func main() {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatalln("error loading .env file")
+	errEnvDev := godotenv.Load(".env")
+	errEnvProd := godotenv.Load(".env.prod")
+	if errEnvDev != nil && errEnvProd != nil {
+		log.Fatalln("error loading environment files")
 	}
 
 	dbAddr := os.Getenv("DATABASE_ADDRESS")
@@ -94,12 +98,25 @@ func main() {
 	e := echo.New()
 	e.Use(addMiddleware(dbClient, databaseContextkey))
 	e.Use(addMiddleware(lruCache, lruCacheContextKey))
-	e.Use(middleware.Logger())
+	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Format: "${remote_ip} -> ${method} ${uri} ${status} ${latency_human}\n",
+	}))
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
 
 	api := e.Group("/api/v2")
 	api.GET("/news", getNews)
 
-	e.Logger.Fatal(e.Start(port))
+	go func() {
+		if err := e.Start(port); err != http.ErrServerClosed {
+			e.Logger.Fatal(err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	if err := e.Shutdown(context.Background()); err != nil {
+		e.Logger.Fatal(err)
+	}
 }

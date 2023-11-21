@@ -73,13 +73,17 @@ func getNews(c echo.Context) error {
 	return c.JSON(http.StatusOK, news)
 }
 
-func main() {
+func init() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
 	errEnvDev := godotenv.Load(".env")
 	errEnvProd := godotenv.Load(".env.prod")
 	if errEnvDev != nil && errEnvProd != nil {
 		log.Fatalln("error loading environment files")
 	}
+}
 
+func main() {
 	dbAddr := os.Getenv("DATABASE_ADDRESS")
 	dbPassword := os.Getenv("DATABASE_PASSWORD")
 	dbClient := cache.NewRedisClient(&redis.Options{

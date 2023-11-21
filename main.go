@@ -55,7 +55,7 @@ func getNews(c echo.Context) error {
 	}
 
 	data, err := dbClient.GetNews(c.Request().Context(), newsCategory)
-	if data != nil {
+	if data != nil && err == nil {
 		lruCache.SetNews(newsCategory, data)
 		return c.JSON(http.StatusOK, data)
 	}

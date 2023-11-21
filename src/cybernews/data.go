@@ -122,7 +122,7 @@ var newsCategory = map[string][]NewsFields{
 	},
 	"security": {
 		{
-			domain:   "https://ciso.economictimes.indiatimes.com",
+			domain:   "https://ciosea.economictimes.indiatimes.com",
 			source:   "The Economic Times",
 			url:      "https://ciosea.economictimes.indiatimes.com/news/security",
 			headline: "article.desc div h3.heading",
@@ -142,7 +142,7 @@ var newsCategory = map[string][]NewsFields{
 	},
 	"cloud": {
 		{
-			domain:   "https://ciso.economictimes.indiatimes.com",
+			domain:   "https://ciosea.economictimes.indiatimes.com",
 			source:   "The Economic Times",
 			url:      "https://ciosea.economictimes.indiatimes.com/news/cloud-computing",
 			headline: "article.desc div h3.heading",
@@ -153,7 +153,7 @@ var newsCategory = map[string][]NewsFields{
 	},
 	"bigData": {
 		{
-			domain:   "https://ciso.economictimes.indiatimes.com",
+			domain:   "https://ciosea.economictimes.indiatimes.com",
 			source:   "The Economic Times",
 			url:      "https://ciosea.economictimes.indiatimes.com/news/big-data",
 			headline: "article.desc div h3.heading",
@@ -162,7 +162,7 @@ var newsCategory = map[string][]NewsFields{
 			image:    ".desc figure a img",
 		},
 		{
-			domain:   "https://ciso.economictimes.indiatimes.com",
+			domain:   "https://ciosea.economictimes.indiatimes.com",
 			source:   "The Economic Times",
 			url:      "https://ciosea.economictimes.indiatimes.com/news/data-center",
 			headline: "article.desc div h3.heading",
@@ -173,7 +173,7 @@ var newsCategory = map[string][]NewsFields{
 	},
 	"research": {
 		{
-			domain:   "https://ciso.economictimes.indiatimes.com",
+			domain:   "https://ciosea.economictimes.indiatimes.com",
 			source:   "The Economic Times",
 			url:      "https://ciosea.economictimes.indiatimes.com/tag/research",
 			headline: "article.desc div h3.heading",
@@ -195,7 +195,7 @@ var newsCategory = map[string][]NewsFields{
 	},
 	"corporate": {
 		{
-			domain:   "https://ciso.economictimes.indiatimes.com",
+			domain:   "https://ciosea.economictimes.indiatimes.com",
 			source:   "The Economic Times",
 			url:      "https://ciosea.economictimes.indiatimes.com/news/corporate",
 			headline: "article.desc div h3.heading",

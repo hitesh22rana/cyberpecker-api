@@ -19,9 +19,10 @@ import (
 )
 
 var (
-	port               = ":8000"
-	lruCacheContextKey = "lruCache"
-	databaseContextkey = "database"
+	port = ":8000"
+
+	redisCacheContextkey = "redisCache"
+	lruCacheContextKey   = "lruCache"
 )
 
 func addMiddleware[T any](client *T, contextKey string) echo.MiddlewareFunc {
@@ -49,12 +50,12 @@ func getNews(c echo.Context) error {
 		return c.JSON(http.StatusOK, cachedData)
 	}
 
-	dbClient, ok := c.Get(databaseContextkey).(*cache.RedisClient)
+	redisCache, ok := c.Get(redisCacheContextkey).(*cache.RedisClient)
 	if !ok {
 		return echo.NewHTTPError(http.StatusInternalServerError, cache.ErrorConnecting.Error())
 	}
 
-	data, err := dbClient.GetNews(c.Request().Context(), newsCategory)
+	data, err := redisCache.GetNews(c.Request().Context(), newsCategory)
 	if data != nil && err == nil {
 		lruCache.SetNews(newsCategory, data)
 		return c.JSON(http.StatusOK, data)
@@ -69,7 +70,7 @@ func getNews(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	dbClient.SetNews(c.Request().Context(), newsCategory, news)
+	redisCache.SetNews(c.Request().Context(), newsCategory, news)
 	return c.JSON(http.StatusOK, news)
 }
 
@@ -84,23 +85,21 @@ func init() {
 }
 
 func main() {
-	dbAddr := os.Getenv("DATABASE_ADDRESS")
-	dbPassword := os.Getenv("DATABASE_PASSWORD")
-	dbClient := cache.NewRedisClient(&redis.Options{
-		Addr:     dbAddr,
-		Password: dbPassword,
+	redisCache := cache.NewRedisClient(&redis.Options{
+		Addr:     os.Getenv("REDIS_ADDRESS"),
+		Password: os.Getenv("REDIS_PASSWORD"),
 		DB:       0,
 	})
-	defer dbClient.Close()
+	defer redisCache.Close()
 
-	if err := dbClient.Health(); err != nil {
+	if err := redisCache.Health(); err != nil {
 		log.Fatalln(err)
 	}
 
-	lruCache := cache.NewLRUCache(10, 120)
+	lruCache := cache.NewLRUCache(cybernews.GetNewsCategorySize(), 120)
 
 	e := echo.New()
-	e.Use(addMiddleware(dbClient, databaseContextkey))
+	e.Use(addMiddleware(redisCache, redisCacheContextkey))
 	e.Use(addMiddleware(lruCache, lruCacheContextKey))
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: "${remote_ip} -> ${method} ${uri} ${status} ${latency_human}\n",

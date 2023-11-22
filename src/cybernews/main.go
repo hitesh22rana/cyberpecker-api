@@ -14,6 +14,10 @@ var (
 	wg sync.WaitGroup
 )
 
+func GetNewsCategorySize() int {
+	return len(newsCategory)
+}
+
 func ValidateNewsCategory(category string) ([]NewsFields, error) {
 	NewsSelectors, exists := newsCategory[category]
 	if !exists {
@@ -43,15 +47,14 @@ func GetNews(newsCategory string) ([]News, error) {
 
 			data := make([][]string, 4)
 			collyClone := c.Clone()
+			collyClone.OnError(func(r *colly.Response, err error) {
+				log.Println("Request URL:", r.Request.URL, "failed with response:", r, "\nand error:", err.Error())
+			})
 
 			scrapeNews(collyClone, newsData.headline, 0, "headline", &data)
 			scrapeNews(collyClone, newsData.news, 1, "news", &data)
 			scrapeNews(collyClone, newsData.link, 2, "link", &data)
 			scrapeNews(collyClone, newsData.image, 3, "image", &data)
-
-			collyClone.OnError(func(r *colly.Response, err error) {
-				log.Println("Request URL:", r.Request.URL, "failed with response:", r, "\nand error:", err.Error())
-			})
 
 			collyClone.Visit(newsData.url)
 			collyClone.Wait()

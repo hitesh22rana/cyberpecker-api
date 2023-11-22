@@ -36,6 +36,7 @@ func (c *LRUCache) hasExpired(key string) bool {
 	if !ok {
 		return false
 	}
+
 	return time.Now().UTC().After(expireTime)
 }
 
@@ -73,6 +74,7 @@ func (c *LRUCache) startTimer() {
 func (c *LRUCache) StopTimer() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
+
 	if c.timer != nil {
 		c.timer.Stop()
 		c.timer = nil

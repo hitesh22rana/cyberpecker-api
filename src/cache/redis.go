@@ -48,6 +48,7 @@ func (c *RedisClient) SetNews(ctx context.Context, key string, value []cybernews
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 

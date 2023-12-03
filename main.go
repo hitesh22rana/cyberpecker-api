@@ -19,8 +19,6 @@ import (
 )
 
 var (
-	port = ":8000"
-
 	redisCacheContextkey = "redisCache"
 	lruCacheContextKey   = "lruCache"
 )
@@ -111,7 +109,7 @@ func main() {
 	api.GET("/news", getNews)
 
 	go func() {
-		if err := e.Start(port); err != http.ErrServerClosed {
+		if err := e.Start(":" + os.Getenv("PORT")); err != http.ErrServerClosed {
 			e.Logger.Fatal(err)
 		}
 	}()

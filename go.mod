@@ -1,6 +1,6 @@
 module github.com/hitesh22rana/cyberpecker-api
 
-go 1.21.3
+go 1.23
 
 require (
 	github.com/gocolly/colly/v2 v2.1.0

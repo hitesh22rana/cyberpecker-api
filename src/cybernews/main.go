@@ -73,5 +73,9 @@ func GetNews(newsCategory string) ([]News, error) {
 	c.Wait()
 	wg.Wait()
 
+	if len(results) == 0 {
+		return nil, fmt.Errorf("no news found for category: (%s)", newsCategory)
+	}
+
 	return results, nil
 }

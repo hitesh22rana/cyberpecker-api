@@ -44,7 +44,7 @@ func getNews(c echo.Context) error {
 	}
 
 	cachedData := lruCache.GetNews(newsCategory)
-	if cachedData != nil {
+	if cachedData != nil && len(cachedData.([]cybernews.News)) > 0 {
 		return c.JSON(http.StatusOK, cachedData)
 	}
 
@@ -54,13 +54,13 @@ func getNews(c echo.Context) error {
 	}
 
 	data, err := redisCache.GetNews(c.Request().Context(), newsCategory)
-	if data != nil && err == nil {
-		lruCache.SetNews(newsCategory, data)
-		return c.JSON(http.StatusOK, data)
-	}
-
 	if err != nil && (errors.Is(err, cache.ErrorConnecting) || errors.Is(err, cache.ErrorJsonParsing)) {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	if len(data) > 0 {
+		lruCache.SetNews(newsCategory, data)
+		return c.JSON(http.StatusOK, data)
 	}
 
 	news, err := cybernews.GetNews(newsCategory)

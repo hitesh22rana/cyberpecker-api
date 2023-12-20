@@ -13,7 +13,7 @@ type LRUCache struct {
 	cache       map[string]*list.Element
 	expireTimes map[string]time.Time
 	list        *list.List
-	mu          sync.Mutex
+	rwMu        sync.RWMutex
 	timer       *time.Timer
 }
 
@@ -79,8 +79,8 @@ func (c *LRUCache) StopTimer() {
 }
 
 func (c *LRUCache) GetNews(key string) interface{} {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.rwMu.Lock()
+	defer c.rwMu.Unlock()
 
 	if ele, ok := c.cache[key]; ok {
 		if c.hasExpired(key) {
@@ -94,8 +94,8 @@ func (c *LRUCache) GetNews(key string) interface{} {
 }
 
 func (c *LRUCache) SetNews(key string, value interface{}) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.rwMu.Lock()
+	defer c.rwMu.Unlock()
 
 	if _, ok := c.cache[key]; ok {
 		c.remove(key)
